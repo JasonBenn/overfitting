@@ -1,3 +1,5 @@
+import argparse
+import os
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -5,9 +7,15 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
+parser = argparse.ArgumentParser(description='Adapted from PyTorch MNIST example')
+parser.add_argument('--experiment', type=int, required=True, help='experiment #, determines folder to store weights and results')
+
+args = parser.parse_args()
+EXPERIMENT = 'experiment_' + str(args.experiment)
+os.mkdir(EXPERIMENT)
+
 BATCH_SIZE = 64
-EPOCHS = 1
-# EPOCHS = 20
+EPOCHS = 20
 LOG_INTERVAL = 100
 LR = .01
 MOMENTUM = 0.5
@@ -78,7 +86,7 @@ def train(epoch):
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.data[0]))
-    torch.save(list(model.parameters()), "train-{}.params".format(epoch))
+    torch.save(list(model.parameters()), EXPERIMENT + "/train_{}.params".format(epoch))
     return loss.data[0]  # POSSIBLE BUG: is this the right value to return?
 
 def test():
@@ -109,5 +117,5 @@ for epoch in range(1, EPOCHS + 1):
     test_loss = test()
     test_losses.append((epoch, test_loss))
 
-torch.save(train_losses, 'train_losses')
-torch.save(test_losses, 'test_losses')
+torch.save(train_losses, EXPERIMENT + '/train_losses')
+torch.save(test_losses, EXPERIMENT + '/test_losses')
