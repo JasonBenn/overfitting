@@ -15,7 +15,7 @@ EXPERIMENT = 'experiment_' + str(args.experiment)
 os.mkdir(EXPERIMENT)
 
 BATCH_SIZE = 64
-EPOCHS = 2
+EPOCHS = 1000
 LOG_INTERVAL = 100
 LR = .01
 MOMENTUM = 0.5
@@ -71,7 +71,10 @@ optimizer = optim.SGD(model.parameters(), lr=LR, momentum=MOMENTUM)
 def train(epoch):
     model.train()
     loss = None
+    total_loss = 0
+    num_batches = 0
     for batch_idx, (data, target) in enumerate(train_loader):
+        num_batches += 1
         if CUDA:
             data, target = data.cuda(), target.cuda()
         data, target = Variable(data), Variable(target)
@@ -80,12 +83,13 @@ def train(epoch):
         loss = F.nll_loss(output, target)
         loss.backward()
         optimizer.step()
+        total_loss += loss.data[0]
         if batch_idx % LOG_INTERVAL == 0:
             print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                 epoch, batch_idx * len(data), len(train_loader.dataset),
                 100. * batch_idx / len(train_loader), loss.data[0]))
     torch.save(list(model.parameters()), EXPERIMENT + "/train_{}.params".format(epoch))
-    return loss.data[0]  # POSSIBLE BUG: is this the right value to return?
+    return total_loss / num_batches
 
 def test():
     model.eval()
