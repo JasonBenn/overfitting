@@ -1,0 +1,1 @@
+An overfit net: 1000 epochs of MNIST without regularization. model.state_dict was saved after each epoch, and the train and test losses for all epochs are saved into test_losses and train_losses (load with `torch.load`).
